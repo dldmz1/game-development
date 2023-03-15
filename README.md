@@ -1,4 +1,4 @@
 # Game-Development
-## Korea University Sejong Campus
+### Korea University Sejong Campus
 ### Computer Convergence Software
-#### 2023 Project
+## 2023 Project

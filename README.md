@@ -1,2 +1,2 @@
 # Game-Development
-## Korea University Sejong Campus, Computer Convergence Software
+#### Korea University Sejong Campus, Computer Convergence Software

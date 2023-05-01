@@ -27,7 +27,7 @@ public class Spawner : MonoBehaviour
         }
     }
 
-    void Spawn()
+    void Spawn() //스폰관련 코드(현재는 몬스터 랜덤만 이후 포인트랑 시간을 통한 보스몹 소환 만들 예정)
     {
         GameObject enemy = GameManager.instance.pool.Get(0);
         enemy.transform.position = spawnPoint[Random.Range(1, spawnPoint.Length)].position;
@@ -36,7 +36,7 @@ public class Spawner : MonoBehaviour
 }
 
 [System.Serializable]
-public class SpawnData
+public class SpawnData //스폰 데이터에 사용될 몬스터의
 {
     public float spawnTime;
     public int spriteType;

@@ -24,31 +24,33 @@ public class TerrainGenerator : MonoBehaviour
     public float hotnessScale = 1;
     public float solidnessScale = 1;
 
+    public int seedRange = 1000000;
+
     void Start()
     {
         mainCamera = Camera.main;
         cameraPosition = mainCamera.transform.position;
 
-        hotnessSeed = Random.Range(-1000000, 1000000);
-        solinessSeed = Random.Range(-1000000, 1000000);
+        hotnessSeed = Random.Range(-seedRange, seedRange);
+        solinessSeed = Random.Range(-seedRange, seedRange);
 
-        initTileData();
-        initTileMap();
-        loadHeatmap();
+        InitTileData();
+        InitTileMap();
+        LoadHeatmap();
     }
 
     void Update()
     {
         Vector3Int topLeftCorner = grid.WorldToCell(mainCamera.ScreenToWorldPoint(new Vector3(0, 0, cameraPosition.z)));
         Vector3Int bottomRightCorner = grid.WorldToCell(mainCamera.ScreenToWorldPoint(new Vector3(mainCamera.pixelWidth, mainCamera.pixelHeight, cameraPosition.z)));
-        //TileBase tile = tilemap.GetTile(cellPosition);
-        loadTiles(topLeftCorner, bottomRightCorner);
-        unloadTiles(topLeftCorner, bottomRightCorner);
+        
+        LoadTiles(topLeftCorner, bottomRightCorner);
+        UnloadTiles(topLeftCorner, bottomRightCorner);
 
         renderedRect = new RectInt(topLeftCorner.x, topLeftCorner.y, bottomRightCorner.x - topLeftCorner.x, bottomRightCorner.y - topLeftCorner.y);
     }
 
-    void initTileData()
+    void InitTileData()
     {
         tileData = new List<TileData>()
         {
@@ -60,7 +62,7 @@ public class TerrainGenerator : MonoBehaviour
         };
     }
 
-    void initTileMap()
+    void InitTileMap()
     {
         tilemaps = new Tilemap[tileData.Count];
         for(int i = 0; i < tileData.Count; i++)
@@ -76,7 +78,7 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-    void loadHeatmap()
+    void LoadHeatmap()
     {
         Dictionary<string, int> colorToTileIndex = new Dictionary<string, int>();
         for(int i = 0; i < tileData.Count; i++)
@@ -97,28 +99,10 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-    void unloadTiles(Vector3Int topLeftCorner, Vector3Int bottomRightCorner)
+    void UnloadTiles(Vector3Int topLeftCorner, Vector3Int bottomRightCorner)
     {
         foreach(Tilemap tilemap in tilemaps) {
             Bounds bounds = tilemap.localBounds;
-
-            /*
-            for (int j = (int)bounds.min.y; j < topLeftCorner.y - 1; j++)
-            {
-                for (int i = (int) bounds.min.x; i < topLeftCorner.x - 1; i++)
-                {
-                    tilemap.SetTile(new Vector3Int(i, j, (int)cameraPosition.z), null);
-                }
-            }
-
-            for (int j = bottomRightCorner.y + 1; j <= bounds.max.y; j++)
-            {
-                for (int i = bottomRightCorner.x + 1; i <= bounds.max.x; i++)
-                {
-                    tilemap.SetTile(new Vector3Int(i, j, (int)cameraPosition.z), null);
-                }
-            }
-            */
 
             for(int j = (int) bounds.min.y; j <= bounds.max.y; j++)
             {
@@ -135,32 +119,8 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-    void loadTiles(Vector3Int topLeftCorner, Vector3Int bottomRightCorner)
+    void LoadTiles(Vector3Int topLeftCorner, Vector3Int bottomRightCorner)
     {
-        /*
-        for (int j = topLeftCorner.y - 1; j < renderedRect.y; j++)
-        {
-            for (int i = topLeftCorner.x - 1; i < renderedRect.x; i++)
-            {
-                int tileIndex = getTileIndex(i, j);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i - 1, j - 1, (int)cameraPosition.z), tileData[tileIndex].tile);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i - 1, j, (int)cameraPosition.z), tileData[tileIndex].tile);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i, j - 1, (int)cameraPosition.z), tileData[tileIndex].tile);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i, j, (int)cameraPosition.z), tileData[tileIndex].tile);
-            }
-        }
-
-        for (int j = renderedRect.y + renderedRect.height; j < bottomRightCorner.y + 2; j++)
-        {
-            for (int i = renderedRect.x + renderedRect.width; i < bottomRightCorner.x + 2; i++)
-            {
-                int tileIndex = getTileIndex(i, j);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i - 1, j - 1, (int)cameraPosition.z), tileData[tileIndex].tile);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i - 1, j, (int)cameraPosition.z), tileData[tileIndex].tile);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i, j - 1, (int)cameraPosition.z), tileData[tileIndex].tile);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i, j, (int)cameraPosition.z), tileData[tileIndex].tile);
-            }
-        }*/
         for (int j = topLeftCorner.y - 1 - worldLoadPadding; j < bottomRightCorner.y + 2 + worldLoadPadding; j++)
         {
             for (int i = topLeftCorner.x - 1 - worldLoadPadding; i < bottomRightCorner.x + 2 + worldLoadPadding; i++)
@@ -168,7 +128,7 @@ public class TerrainGenerator : MonoBehaviour
                 if (i >= renderedRect.x && i < renderedRect.x + renderedRect.width && j >= renderedRect.y && j < renderedRect.y + renderedRect.height)
                     continue;
 
-                int tileIndex = getTileIndex(i, j);
+                int tileIndex = GetTileIndex(i, j);
 
                 tilemaps[tileIndex].SetTile(new Vector3Int(i - 1, j - 1, (int)cameraPosition.z), tileData[tileIndex].tile);
                 tilemaps[tileIndex].SetTile(new Vector3Int(i - 1, j, (int)cameraPosition.z), tileData[tileIndex].tile);
@@ -178,17 +138,11 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-    int getTileIndex(int x, int y)
+    int GetTileIndex(int x, int y)
     {
-        /*
-        int newX = ((x / 5) % tilemaps.Length + 5) % tilemaps.Length;
-        int newY = ((y / 5) % tilemaps.Length + 5) % tilemaps.Length;
-        return (newX + newY) % tilemaps.Length;
-        */
-        
         float hotPerVal = Mathf.PerlinNoise((hotnessSeed + x) * hotnessScale, (hotnessSeed + y) * hotnessScale);
         float solPerVal = Mathf.PerlinNoise((solinessSeed + x) * solidnessScale, (solinessSeed + y) * solidnessScale);
-        //return tileHeatmap[(int)Mathf.Round(hotPerVal * tileHeatmap.Length), (int)Mathf.Round(solPerVal * tileHeatmap[0].Length)]; 
+        
         return tileHeatmap[(int) (hotPerVal * tileHeatmap.GetLength(0)), (int) (solPerVal * tileHeatmap.GetLength(1))];
     }
 

@@ -173,9 +173,11 @@ MonoBehaviour:
     width: 0
     height: 0
   grid: {fileID: 1909301639}
-  seed: 0
-  hotnessScale: 1
-  solidnessScale: 1
+  worldLoadPadding: 5
+  hotnessSeed: 5
+  solinessSeed: 0
+  hotnessScale: 0.01
+  solidnessScale: 0.01
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

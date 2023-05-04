@@ -17,14 +17,20 @@ public class TerrainGenerator : MonoBehaviour
 
     int[,] tileHeatmap;
 
-    public int seed = 0;
-    public double hotnessScale = 1;
-    public double solidnessScale = 1;
+    public int worldLoadPadding = 10;
+
+    public int hotnessSeed = 0;
+    public int solinessSeed = 0;
+    public float hotnessScale = 1;
+    public float solidnessScale = 1;
 
     void Start()
     {
         mainCamera = Camera.main;
         cameraPosition = mainCamera.transform.position;
+
+        hotnessSeed = Random.Range(-1000000, 1000000);
+        solinessSeed = Random.Range(-1000000, 1000000);
 
         initTileData();
         initTileMap();
@@ -78,7 +84,7 @@ public class TerrainGenerator : MonoBehaviour
             colorToTileIndex.Add(tileData[i].color, i);
         }
 
-        Texture2D texture = Resources.Load<Texture2D>("Textures/Heatmap.png");
+        Texture2D texture = Resources.Load<Texture2D>("Textures/Heatmap");
         int width = texture.width;
         int height = texture.height;
         tileHeatmap = new int[width, height];
@@ -155,9 +161,9 @@ public class TerrainGenerator : MonoBehaviour
                 tilemaps[tileIndex].SetTile(new Vector3Int(i, j, (int)cameraPosition.z), tileData[tileIndex].tile);
             }
         }*/
-        for (int j = topLeftCorner.y - 1; j < bottomRightCorner.y + 2; j++)
+        for (int j = topLeftCorner.y - 1 - worldLoadPadding; j < bottomRightCorner.y + 2 + worldLoadPadding; j++)
         {
-            for (int i = topLeftCorner.x - 1; i < bottomRightCorner.x + 2; i++)
+            for (int i = topLeftCorner.x - 1 - worldLoadPadding; i < bottomRightCorner.x + 2 + worldLoadPadding; i++)
             {
                 if (i >= renderedRect.x && i < renderedRect.x + renderedRect.width && j >= renderedRect.y && j < renderedRect.y + renderedRect.height)
                     continue;
@@ -174,66 +180,18 @@ public class TerrainGenerator : MonoBehaviour
 
     int getTileIndex(int x, int y)
     {
+        /*
         int newX = ((x / 5) % tilemaps.Length + 5) % tilemaps.Length;
         int newY = ((y / 5) % tilemaps.Length + 5) % tilemaps.Length;
         return (newX + newY) % tilemaps.Length;
+        */
+        
+        float hotPerVal = Mathf.PerlinNoise((hotnessSeed + x) * hotnessScale, (hotnessSeed + y) * hotnessScale);
+        float solPerVal = Mathf.PerlinNoise((solinessSeed + x) * solidnessScale, (solinessSeed + y) * solidnessScale);
+        //return tileHeatmap[(int)Mathf.Round(hotPerVal * tileHeatmap.Length), (int)Mathf.Round(solPerVal * tileHeatmap[0].Length)]; 
+        return tileHeatmap[(int) (hotPerVal * tileHeatmap.GetLength(0)), (int) (solPerVal * tileHeatmap.GetLength(1))];
     }
 
-    /*
-    // Width and height of the texture in pixels.
-    public int pixWidth;
-    public int pixHeight;
-
-    // The origin of the sampled area in the plane.
-    public float xOrg;
-    public float yOrg;
-
-    // The number of cycles of the basic noise pattern that are repeated
-    // over the width and height of the texture.
-    public float scale = 1.0F;
-
-    private Texture2D noiseTex;
-    private Color[] pix;
-    private Renderer rend;
-
-    void Start()
-    {
-        rend = GetComponent<Renderer>();
-
-        // Set up the texture and a Color array to hold pixels during processing.
-        noiseTex = new Texture2D(pixWidth, pixHeight);
-        pix = new Color[noiseTex.width * noiseTex.height];
-        rend.material.mainTexture = noiseTex;
-    }
-
-    void CalcNoise()
-    {
-        // For each pixel in the texture...
-        float y = 0.0F;
-
-        while (y < noiseTex.height)
-        {
-            float x = 0.0F;
-            while (x < noiseTex.width)
-            {
-                float xCoord = xOrg + x / noiseTex.width * scale;
-                float yCoord = yOrg + y / noiseTex.height * scale;
-                float sample = Mathf.PerlinNoise(xCoord, yCoord);
-                pix[(int)y * noiseTex.width + (int)x] = new Color(sample, sample, sample);
-                x++;
-            }
-            y++;
-        }
-
-        // Copy the pixel data to the texture and load it into the GPU.
-        noiseTex.SetPixels(pix);
-        noiseTex.Apply();
-    }
-
-    void Update()
-    {
-        CalcNoise();
-    }*/
 }
 
 class TileData

@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 320492893}
   - component: {fileID: 320492894}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: TerrainGenerator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -178,6 +178,7 @@ MonoBehaviour:
   solinessSeed: 0
   hotnessScale: 0.01
   solidnessScale: 0.01
+  seedRange: 1000000
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

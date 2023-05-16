@@ -28,9 +28,7 @@ public class Spawner : MonoBehaviour
             Spawn();
         }
 
-
-
-        if (!flag && GameManager.instance.gameTime>= GameManager.instance.maxGameTime) // 시간 조건만 따짐(포인트 관련 추가 예정)
+        if (!flag && GameManager.instance.gameTime>= GameManager.instance.maxGameTime && GameManager.instance.player.score >= 1000) // 보스 소환 조건
         {
             boss_Spawn();
         }
@@ -53,7 +51,7 @@ public class Spawner : MonoBehaviour
 }
 
 [System.Serializable]
-public class SpawnData //스폰 데이터에 사용될 몬스터의
+public class SpawnData //스폰 데이터에 사용될 몬스터의 stat
 {
     public float spawnTime;
     public int spriteType;

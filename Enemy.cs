@@ -57,4 +57,27 @@ public class Enemy : MonoBehaviour
         health = data.health;
         point = data.point;
     }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!collision.CompareTag("Bullet"))
+            return;
+
+        health -= collision.GetComponent<Bullet>().damage;
+
+        if (health > 0)
+        {
+
+        }
+        else
+        {
+            GameManager.instance.player.score += point; // 포인트 증가
+            Dead();
+        }
+    }
+
+    void Dead() // 몬스터 사망
+    {
+        gameObject.SetActive(false);
+    }
 }

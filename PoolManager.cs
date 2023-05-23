@@ -5,35 +5,35 @@ using UnityEngine;
 
 public class PoolManager : MonoBehaviour
 {
-    // í”„ë¦¬í©ë“¤ì„ ë³´ê´€í•  ë³€ìˆ˜
+    // ÇÁ¸®ÆéµéÀ» º¸°üÇÒ º¯¼ö
     public GameObject[] prefabs;
 
-    // í’€ ë‹´ë‹¹ì„ í•˜ëŠ” ë¦¬ìŠ¤íŠ¸ë“¤
+    // Ç® ´ã´çÀ» ÇÏ´Â ¸®½ºÆ®µé
     List<GameObject>[] pools;
 
     void Awake()
     {
-        pools = new List<GameObject>[prefabs.Length];   //poolê³¼ list ì´ˆê¸°í™”
+        pools = new List<GameObject>[prefabs.Length];   //pool°ú list ÃÊ±âÈ­
 
         for( int i = 0; i < pools.Length; i++) {
             pools[i] = new List<GameObject> ();
         }
     }
 
-    public GameObject Get(int index)  //ê²Œì„ì˜¤ë¸Œì íŠ¸ë¥¼ ë°˜í™˜
+    public GameObject Get(int index)  //°ÔÀÓ¿ÀºêÁ§Æ®¸¦ ¹İÈ¯
     {
         GameObject select = null;
-        // ì„ íƒí•œ í’€ì˜ ë†€ê³ ìˆëŠ”(ë¹„í™œì„±í™” ëœ) ê²Œì„ì˜¤ë¸Œì íŠ¸ ì ‘ê·¼ 
-        // ë°œê²¬í•˜ë©´ select ë³€ìˆ˜ì— í• ë‹¹
+        // ¼±ÅÃÇÑ Ç®ÀÇ ³î°íÀÖ´Â(ºñÈ°¼ºÈ­ µÈ) °ÔÀÓ¿ÀºêÁ§Æ® Á¢±Ù 
+        // ¹ß°ßÇÏ¸é select º¯¼ö¿¡ ÇÒ´ç
 
         foreach (GameObject item in pools[index]) {
-            if (!item.activeSelf) {       //ë†€ê³ ìˆëŠ”ê²ƒ ë°œê²¬í•˜ë©´ select ë³€ìˆ˜ì— í• ë‹¹
+            if (!item.activeSelf) {       //³î°íÀÖ´Â°Í ¹ß°ßÇÏ¸é select º¯¼ö¿¡ ÇÒ´ç
                 select = item;
                 select.SetActive(true);
                 break;
             }
         }
-        // ëª»ì°¾ìœ¼ë©´ ìƒˆë¡­ê²Œ ìƒì„±í•´ì„œ select ë³€ìˆ˜ì— í• ë‹¹
+        // ¸øÃ£À¸¸é »õ·Ó°Ô »ı¼ºÇØ¼­ select º¯¼ö¿¡ ÇÒ´ç
 
         if (!select) {      //select == null;
             select = Instantiate(prefabs[index], transform);

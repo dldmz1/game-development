@@ -7,7 +7,7 @@ public class Enemy : MonoBehaviour
     public float speed;
     public Rigidbody2D target;
 
-    bool isLive = true;   // ëª¬ìŠ¤í„° ìƒì¡´?
+    bool isLive = true;   // ¸ó½ºÅÍ »ıÁ¸?
 
     Rigidbody2D rigid;
     SpriteRenderer spriter;
@@ -32,7 +32,7 @@ public class Enemy : MonoBehaviour
 
     }
 
-    void LateUpdate()//ëª¬ìŠ¤í„°ê°€ í”Œë ˆì´ì–´ë¥¼ ë°”ë¼ë³´ë„ë¡ ë°©í–¥ë³€ê²½
+    void LateUpdate()//¸ó½ºÅÍ°¡ ÇÃ·¹ÀÌ¾î¸¦ ¹Ù¶óº¸µµ·Ï ¹æÇâº¯°æ
     {
         if (!isLive)
             return;

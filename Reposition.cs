@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class Reposition : MonoBehaviour
 {
-    Collider2D coll;        // enemyê°€ ì£½ì—ˆëŠ”ì§€ ì‚´ì•˜ëŠ”ì§€ ì•Œê¸°ìœ„í•´
+    Collider2D coll;        // enemy°¡ Á×¾ú´ÂÁö »ì¾Ò´ÂÁö ¾Ë±âÀ§ÇØ
 
     void Awake()
     {
@@ -23,7 +23,7 @@ public class Reposition : MonoBehaviour
         float diffX = Mathf.Abs(playerPos.x - myPos.x);
         float diffY = Mathf.Abs(playerPos.y - myPos.y);
 
-        Vector3 playerDir = GameManager.instance.player.inputVec;     //í”Œë ˆì´ì–´ê°€ ê°€ëŠ” ë°©í–¥
+        Vector3 playerDir = GameManager.instance.player.inputVec;     //ÇÃ·¹ÀÌ¾î°¡ °¡´Â ¹æÇâ
         float dirX = playerDir.x < 0 ? -1 : 1;
         float dirY = playerDir.y < 0 ? -1 : 1;
         
@@ -37,7 +37,7 @@ public class Reposition : MonoBehaviour
                 }
                 break;
             case "Enemy":
-                if (coll.enabled){      //ì§€ê¸ˆ colliderê°€ í™œì„±í™” ë˜ì–´ìˆë‚˜ìš”??
+                if (coll.enabled){      //Áö±İ collider°¡ È°¼ºÈ­ µÇ¾îÀÖ³ª¿ä??
                     transform.Translate(playerDir *20 + new Vector3(Random.Range(-3f, 3f), Random.Range(-3f, 3f), 0f));
                 }
                 break;

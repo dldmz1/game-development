@@ -12,6 +12,8 @@ public class Enemy : MonoBehaviour
 
     bool isLive;
 
+    public ParticleSystem enemyDeadEffect;
+
     Rigidbody2D rigid; //enemy rigidbody
     Collider2D coll;
     Animator anim;
@@ -52,6 +54,8 @@ public class Enemy : MonoBehaviour
     private void OnEnable() //스크립트 활성화시
     {
         target = GameManager.instance.player.GetComponent<Rigidbody2D>();
+        enemyDeadEffect = GameManager.instance.deadEffect;
+
         isLive = true;
         coll.enabled = true;
         rigid.simulated = true;
@@ -83,16 +87,24 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            spriter.color = new Color(0.3f, 0.3f, 0.3f, 1); //죽을경우 색 변경
+            spriter.color = new Color(0.3f, 0.3f, 0.3f, 1); //죽을경우 색 변경\
 
             isLive = false;
             coll.enabled = false;
-            rigid.simulated = false;
             spriter.sortingOrder = 0;
             anim.SetBool("Dead", true);
-            GameManager.instance.kill++;
-            GameManager.instance.GetExp();
+
+            Invoke("PlayDead", 0.1f);
         }
+    }
+
+    public void PlayDead()
+    {
+        rigid.simulated = false;
+
+        GameManager.instance.kill++;
+        GameManager.instance.GetExp();
+        Invoke("EffectPlay", 0.9f);
     }
 
     IEnumerator KnockBack()
@@ -106,5 +118,12 @@ public class Enemy : MonoBehaviour
     void Dead()
     {
         gameObject.SetActive(false);
+    }
+
+    void EffectPlay()
+    {
+        enemyDeadEffect.transform.position = transform.position;
+        enemyDeadEffect.transform.localScale = transform.localScale;
+        enemyDeadEffect.Play();
     }
 }

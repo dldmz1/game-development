@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     [Header("# Game Object#")]
     public Player player;
     public PoolManager pool;
+    public ParticleSystem deadEffect;
 
     [Header("# Player Info #")]
     public int level;

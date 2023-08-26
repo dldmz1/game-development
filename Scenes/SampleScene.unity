@@ -173,8 +173,9 @@ MonoBehaviour:
     width: 0
     height: 0
   grid: {fileID: 1909301639}
+  heatmap: {fileID: 6876965396455774176, guid: 8d38e60715657d04bbb17b21b2e94de4, type: 3}
   worldLoadPadding: 5
-  hotnessSeed: 5
+  hotnessSeed: 0
   solinessSeed: 0
   hotnessScale: 0.01
   solidnessScale: 0.01

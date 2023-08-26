@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using System.Linq;
 
 public class TerrainGenerator : MonoBehaviour
 {
@@ -11,10 +9,11 @@ public class TerrainGenerator : MonoBehaviour
     Camera mainCamera;
     Vector3 cameraPosition;
     public Grid grid;
-    Tilemap[] tilemaps;
 
-    List<TileData> tileData;
-
+    public GameObject heatmap;
+    List<Tilemap> tilemaps = new List<Tilemap>();
+    Dictionary<TileBase, int> tileToIndex = new Dictionary<TileBase, int>();
+    List<TileBase> tiles = new List<TileBase>();
     int[,] tileHeatmap;
 
     public int worldLoadPadding = 10;
@@ -31,11 +30,11 @@ public class TerrainGenerator : MonoBehaviour
         mainCamera = Camera.main;
         cameraPosition = mainCamera.transform.position;
 
-        hotnessSeed = Random.Range(-seedRange, seedRange);
-        solinessSeed = Random.Range(-seedRange, seedRange);
+        if(hotnessSeed == 0)
+            hotnessSeed = Random.Range(-seedRange, seedRange);
+        if(solinessSeed == 0)
+            solinessSeed = Random.Range(-seedRange, seedRange);
 
-        InitTileData();
-        InitTileMap();
         LoadHeatmap();
     }
 
@@ -50,51 +49,48 @@ public class TerrainGenerator : MonoBehaviour
         renderedRect = new RectInt(topLeftCorner.x, topLeftCorner.y, bottomRightCorner.x - topLeftCorner.x, bottomRightCorner.y - topLeftCorner.y);
     }
 
-    void InitTileData()
+    int AddTilemap(string name)
     {
-        tileData = new List<TileData>()
-        {
-            new TileData("LavaCave", "ED7D31"),
-            new TileData("Cave", "808080"),
-            new TileData("Desert", "FFFF00"),
-            new TileData("Field", "92D050"),
-            new TileData("Winter", "00B0F0"),
-        };
-    }
+        GameObject obj = new GameObject(name);
+        obj.transform.parent = grid.transform;
 
-    void InitTileMap()
-    {
-        tilemaps = new Tilemap[tileData.Count];
-        for(int i = 0; i < tileData.Count; i++)
-        {
-            TileData data = tileData[i];
+        tilemaps.Add(obj.AddComponent<Tilemap>());
+        TilemapRenderer tilemapRenderer = obj.AddComponent<TilemapRenderer>();
+        tilemapRenderer.sortingOrder = tilemaps.Count - 1;
 
-            GameObject obj = new GameObject(data.tileName);
-            obj.transform.parent = grid.transform;
-
-            tilemaps[i] = obj.AddComponent<Tilemap>();
-            TilemapRenderer tilemapRenderer = obj.AddComponent<TilemapRenderer>();
-            tilemapRenderer.sortingOrder = i;
-        }
+        return tilemaps.Count - 1;
     }
 
     void LoadHeatmap()
     {
-        Dictionary<string, int> colorToTileIndex = new Dictionary<string, int>();
-        for(int i = 0; i < tileData.Count; i++)
-        {
-            colorToTileIndex.Add(tileData[i].color, i);
+        Tilemap heatTiles = heatmap.GetComponentInChildren<Tilemap>();
+        heatTiles.CompressBounds();
+        BoundsInt bounds = heatTiles.cellBounds;
+
+        int width = bounds.max.x - bounds.min.x;
+        int height = bounds.max.y - bounds.min.y - 1;
+
+        for(int i = bounds.min.x; i <= bounds.max.x; i++) {
+            TileBase tile = heatTiles.GetTile(new Vector3Int(i, bounds.max.y - 1, 0));
+            if (tile == null)
+                continue;
+
+            int index = AddTilemap(tile.name);
+            tileToIndex.Add(tile, index);
+            tiles.Add(tile);
+
         }
 
-        Texture2D texture = Resources.Load<Texture2D>("Textures/Heatmap");
-        int width = texture.width;
-        int height = texture.height;
+
         tileHeatmap = new int[width, height];
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                tileHeatmap[x, y] = colorToTileIndex[ColorUtility.ToHtmlStringRGB(texture.GetPixel(x, y))];
+
+        for(int j = 0; j < height; j++) {
+            for(int i = 0; i < width; i++) {
+                TileBase tile = heatTiles.GetTile(new Vector3Int(bounds.min.x + i, bounds.min.y + j, 0));
+                if (tile == null)
+                    continue;
+
+                tileHeatmap[i, j] = tileToIndex[tile];
             }
         }
     }
@@ -130,34 +126,20 @@ public class TerrainGenerator : MonoBehaviour
 
                 int tileIndex = GetTileIndex(i, j);
 
-                tilemaps[tileIndex].SetTile(new Vector3Int(i - 1, j - 1, (int)cameraPosition.z), tileData[tileIndex].tile);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i - 1, j, (int)cameraPosition.z), tileData[tileIndex].tile);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i, j - 1, (int)cameraPosition.z), tileData[tileIndex].tile);
-                tilemaps[tileIndex].SetTile(new Vector3Int(i, j, (int)cameraPosition.z), tileData[tileIndex].tile);
+                tilemaps[tileIndex].SetTile(new Vector3Int(i - 1, j - 1, (int)cameraPosition.z), tiles[tileIndex]);
+                tilemaps[tileIndex].SetTile(new Vector3Int(i - 1, j, (int)cameraPosition.z), tiles[tileIndex]);
+                tilemaps[tileIndex].SetTile(new Vector3Int(i, j - 1, (int)cameraPosition.z), tiles[tileIndex]);
+                tilemaps[tileIndex].SetTile(new Vector3Int(i, j, (int)cameraPosition.z), tiles[tileIndex]);
             }
         }
     }
 
     int GetTileIndex(int x, int y)
     {
-        float hotPerVal = Mathf.PerlinNoise((hotnessSeed + x) * hotnessScale, (hotnessSeed + y) * hotnessScale);
-        float solPerVal = Mathf.PerlinNoise((solinessSeed + x) * solidnessScale, (solinessSeed + y) * solidnessScale);
+        float hotPerVal = Mathf.Clamp(Mathf.PerlinNoise((hotnessSeed + x) * hotnessScale, (hotnessSeed + y) * hotnessScale), 0, 1);
+        float solPerVal = Mathf.Clamp(Mathf.PerlinNoise((solinessSeed + x) * solidnessScale, (solinessSeed + y) * solidnessScale), 0, 1);
         
-        return tileHeatmap[(int) (hotPerVal * tileHeatmap.GetLength(0)), (int) (solPerVal * tileHeatmap.GetLength(1))];
+        return tileHeatmap[(int) (hotPerVal * (tileHeatmap.GetLength(0) - 1)), (int) (solPerVal * (tileHeatmap.GetLength(1) - 1))];
     }
 
-}
-
-class TileData
-{
-    public readonly string tileName;
-    public readonly string color;
-    public readonly RuleTile tile;
-
-    public TileData(string tileName, string color)
-    {
-        this.tileName = tileName;
-        this.color = color;
-        this.tile = Resources.Load<RuleTile>("Tiles/" + tileName + "RuleTile");
-    }
 }
